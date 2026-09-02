@@ -35,12 +35,12 @@ export class TrackManager {
     this.segs = built.segs;
 
     const roadMat = new THREE.MeshStandardMaterial({
-      color: 0x2a2c32,
+      color: 0x4a4e58,
       map: assets.textures.asphalt,
       roughnessMap: assets.textures.asphaltRough,
-      roughness: 0.32,
-      metalness: 0.18,
-      envMapIntensity: 1.35
+      roughness: 0.38,
+      metalness: 0.22,
+      envMapIntensity: 1.1
     });
     const road = new THREE.Mesh(built.geo, roadMat);
     road.receiveShadow = true;

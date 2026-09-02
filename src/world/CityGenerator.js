@@ -26,7 +26,7 @@ export class CityGenerator {
   }
 
   _ground() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x0b0c12, roughness: 0.95, metalness: 0.05 });
+    const mat = new THREE.MeshStandardMaterial({ color: 0x161822, roughness: 0.9, metalness: 0.08 });
     const g = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), mat);
     g.rotation.x = -Math.PI / 2;
     g.position.y = -0.2;
@@ -61,7 +61,7 @@ export class CityGenerator {
       metalness: 0.25,
       emissive: 0xffffff,
       emissiveMap: assets.textures.windows,
-      emissiveIntensity: 0.85
+      emissiveIntensity: 1.4
     });
     const winB = new THREE.MeshStandardMaterial({
       map: assets.textures.windows2,
@@ -70,7 +70,7 @@ export class CityGenerator {
       metalness: 0.2,
       emissive: 0xffffff,
       emissiveMap: assets.textures.windows2,
-      emissiveIntensity: 0.7
+      emissiveIntensity: 1.15
     });
     const bodyMats = [
       new THREE.MeshStandardMaterial({ color: 0x15171f, roughness: 0.7, metalness: 0.25 }),

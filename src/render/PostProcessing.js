@@ -11,10 +11,7 @@ const GradeShader = {
     uTime: { value: 0 },
     uSpeed: { value: 0 },
     uNitro: { value: 0 },
-    uVignette: { value: 0.55 },
-    uGrain: { value: 0.08 },
-    uAberration: { value: 0.0018 },
-    uRain: { value: 1 }
+    uRain: { value: 0 }
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -28,54 +25,30 @@ const GradeShader = {
     uniform float uTime;
     uniform float uSpeed;
     uniform float uNitro;
-    uniform float uVignette;
-    uniform float uGrain;
-    uniform float uAberration;
     uniform float uRain;
     varying vec2 vUv;
-
-    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
 
     void main() {
       vec2 uv = vUv;
       vec2 c = uv - 0.5;
       float r2 = dot(c, c);
-      float ab = uAberration + uSpeed * 0.0008 + uNitro * 0.004;
+
+      float ab = uNitro * 0.0016;
       vec3 col;
       col.r = texture2D(tDiffuse, uv + c * ab).r;
       col.g = texture2D(tDiffuse, uv).g;
       col.b = texture2D(tDiffuse, uv - c * ab).b;
 
-      float vig = smoothstep(0.9, 0.2, r2 * (0.7 + uVignette));
-      col *= vig;
+      col *= 1.18;
+      col += 0.03;
 
-      // cinematic grade
-      col.r = pow(col.r, 0.96) * 1.04;
-      col.b = pow(col.b, 0.92) * 1.08;
-      col.g *= 0.98;
-      col = mix(col, col * vec3(0.75, 0.9, 1.15), 0.12);
-      col = mix(col, vec3(dot(col, vec3(0.3,0.5,0.2))), -0.08);
+      float vig = smoothstep(1.15, 0.42, r2);
+      col *= mix(1.0, vig, 0.35);
 
-      float g = hash(uv * vec2(1920.0, 1080.0) + uTime * 60.0);
-      col += (g - 0.5) * uGrain;
+      float g = fract(sin(dot(uv * vec2(164.0, 311.0), vec2(12.9898, 78.233)) + uTime) * 43758.5453);
+      col += (g - 0.5) * 0.025;
 
-      // speed lines
-      float ang = atan(c.y, c.x);
-      float sl = smoothstep(0.18, 0.7, r2) * uSpeed * 0.012;
-      float lines = smoothstep(0.6, 1.0, fract(ang * 18.0 + uTime * 9.0));
-      col += lines * sl * vec3(0.7, 0.85, 1.0);
-
-      // nitro wash
-      col += uNitro * 0.08 * vec3(0.3, 0.8, 1.0);
-      col *= 1.0 + uNitro * 0.08;
-
-      // rain droplets (screen)
-      if (uRain > 0.01) {
-        vec2 ruv = uv * vec2(6.0, 4.0);
-        ruv.y += uTime * 0.15;
-        float drops = smoothstep(0.92, 1.0, hash(floor(ruv * 20.0)));
-        col += drops * 0.08 * uRain * vec3(0.7, 0.8, 1.0);
-      }
+      col += uNitro * 0.05 * vec3(0.25, 0.7, 1.0);
 
       gl_FragColor = vec4(col, 1.0);
     }
@@ -89,7 +62,7 @@ export class PostProcessing {
     this.camera = camera;
     this.composer = new EffectComposer(renderer);
     this.renderPass = new RenderPass(scene, camera);
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.7, 0.55, 0.22);
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.28, 0.35, 0.85);
     this.grade = new ShaderPass(GradeShader);
     this.output = new OutputPass();
     this.composer.addPass(this.renderPass);
@@ -102,6 +75,8 @@ export class PostProcessing {
 
   applyQuality(preset) {
     this.bloom.strength = preset.bloom ? preset.bloomStrength : 0;
+    this.bloom.threshold = 0.85;
+    this.bloom.radius = 0.32;
     this.bloom.enabled = preset.bloom;
     this.resize();
   }

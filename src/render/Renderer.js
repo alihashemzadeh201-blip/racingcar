@@ -8,10 +8,10 @@ export class Renderer {
       powerPreference: 'high-performance',
       alpha: false
     });
-    this.renderer.setClearColor(0x05060c, 1);
+    this.renderer.setClearColor(0x10182c, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = 1.55;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.resize();
@@ -21,6 +21,7 @@ export class Renderer {
   applyQuality(preset) {
     this.renderer.setPixelRatio(preset.pixelRatio);
     this.renderer.shadowMap.enabled = preset.shadows;
+    this.renderer.toneMappingExposure = 1.55;
     this.resize();
   }
 

@@ -36,10 +36,9 @@ export class SettingsManager {
     const renderer = info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : '';
     const cores = navigator.hardwareConcurrency || 4;
     const mem = navigator.deviceMemory || 4;
-    const lowGpu = /intel|swiftshader|llvmpipe|mali|adreno/i.test(renderer);
-    if (lowGpu || cores <= 4 || mem <= 4) this.data.quality = 'medium';
-    if (/intel hd|uhd 6|swiftshader/i.test(renderer) || mem <= 2) this.data.quality = 'low';
-    if (!lowGpu && cores >= 12 && mem >= 8) this.data.quality = 'high';
+    const software = /swiftshader|llvmpipe|softpipe/i.test(renderer);
+    if (software || mem <= 2) this.data.quality = 'medium';
+    else this.data.quality = 'high';
   }
 
   save() {
@@ -63,7 +62,7 @@ export class SettingsManager {
     const q = this.data.quality;
     const table = {
       low: {
-        pixelRatio: 0.75,
+        pixelRatio: 1,
         bloom: false,
         bloomStrength: 0,
         shadows: false,
@@ -81,7 +80,7 @@ export class SettingsManager {
       medium: {
         pixelRatio: 1,
         bloom: true,
-        bloomStrength: 0.45,
+        bloomStrength: 0.22,
         shadows: false,
         shadowSize: 1024,
         streetLights: 4,
@@ -113,7 +112,7 @@ export class SettingsManager {
       ultra: {
         pixelRatio: Math.min(devicePixelRatio, 2),
         bloom: true,
-        bloomStrength: 0.9,
+        bloomStrength: 0.36,
         shadows: true,
         shadowSize: 2048,
         streetLights: 12,

@@ -241,10 +241,12 @@ export class Game {
     ring.rotation.x = Math.PI / 2;
     ring.position.y = 0.05;
     this.scenes.world.add(ring);
-    const p1 = new THREE.PointLight(0xff2d6a, 18, 30);
+    const p1 = new THREE.PointLight(0xff2d6a, 32, 40);
     p1.position.set(-6, 4, 4);
-    const p2 = new THREE.PointLight(0x3cf0ff, 16, 30);
+    const p2 = new THREE.PointLight(0x3cf0ff, 28, 40);
     p2.position.set(6, 3, -4);
+    const p3 = new THREE.PointLight(0xffffff, 16, 24);
+    p3.position.set(0, 6, 2);
     this.scenes.world.add(p1, p2);
     this._refreshMenuCar();
     this.lights.build([], this.settings.preset);
@@ -527,15 +529,6 @@ export class Game {
 
   _adapt(dt) {
     this._fps = this._fps * 0.9 + (1 / Math.max(dt, 0.008)) * 0.1;
-    this._adaptT += dt;
-    if (this._adaptT > 4) {
-      this._adaptT = 0;
-      const q = this.settings.quality;
-      if (this._fps < 38 && q !== 'low') {
-        const down = { ultra: 'high', high: 'medium', medium: 'low' };
-        this.applyQuality(down[q]);
-      }
-    }
   }
 
   _resize() {

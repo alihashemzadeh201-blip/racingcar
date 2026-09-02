@@ -26,8 +26,8 @@ export class Vehicle {
   }
 
   _addHeadlights() {
-    const spotL = new THREE.SpotLight(0xe8f4ff, 8, 48, Math.PI / 7, 0.45, 1.2);
-    const spotR = new THREE.SpotLight(0xe8f4ff, 8, 48, Math.PI / 7, 0.45, 1.2);
+    const spotL = new THREE.SpotLight(0xe8f4ff, 22, 56, Math.PI / 6, 0.4, 1.0);
+    const spotR = new THREE.SpotLight(0xe8f4ff, 22, 56, Math.PI / 6, 0.4, 1.0);
     spotL.position.set(0.55, 0.55, 2.3);
     spotR.position.set(-0.55, 0.55, 2.3);
     const tL = new THREE.Object3D();
@@ -42,7 +42,7 @@ export class Vehicle {
 
   setQuality(preset) {
     this.headlights.forEach((l) => {
-      l.intensity = preset.shadows ? 10 : 6;
+      l.intensity = 22;
       l.castShadow = false;
     });
   }

@@ -7,6 +7,7 @@ export class LightingSystem {
     this.moon = null;
     this.hemi = null;
     this.flash = null;
+    this.ambient = null;
   }
 
   build(lamps, quality) {
@@ -15,11 +16,15 @@ export class LightingSystem {
     if (this.moon) this.scene.remove(this.moon);
     if (this.hemi) this.scene.remove(this.hemi);
     if (this.flash) this.scene.remove(this.flash);
+    if (this.ambient) this.scene.remove(this.ambient);
 
-    this.hemi = new THREE.HemisphereLight(0x334466, 0x1a0610, 0.45);
+    this.ambient = new THREE.AmbientLight(0x4a5570, 0.55);
+    this.scene.add(this.ambient);
+
+    this.hemi = new THREE.HemisphereLight(0x8aa6d6, 0x2a1828, 1.15);
     this.scene.add(this.hemi);
 
-    this.moon = new THREE.DirectionalLight(0xa8c4ff, 0.55);
+    this.moon = new THREE.DirectionalLight(0xd8e6ff, 1.65);
     this.moon.position.set(-80, 120, 40);
     this.moon.castShadow = quality.shadows;
     if (quality.shadows) {
@@ -41,7 +46,7 @@ export class LightingSystem {
 
     const n = quality.streetLights;
     for (let i = 0; i < n; i++) {
-      const l = new THREE.PointLight(0xffd2a0, 0, 28, 2);
+      const l = new THREE.PointLight(0xffe0b0, 0, 42, 1.6);
       this.scene.add(l);
       this.street.push(l);
     }
@@ -63,7 +68,7 @@ export class LightingSystem {
         continue;
       }
       this.street[i].position.copy(src.l.position);
-      this.street[i].intensity = 6.5;
+      this.street[i].intensity = 14;
     }
     if (this.moon.castShadow) {
       this.moon.position.set(playerPos.x - 40, playerPos.y + 80, playerPos.z + 20);
