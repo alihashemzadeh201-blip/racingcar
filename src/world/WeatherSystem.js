@@ -4,7 +4,7 @@ export class WeatherSystem {
   constructor(scene, assets) {
     this.scene = scene;
     this.assets = assets;
-    this.enabled = true;
+    this.enabled = false;
     this.lightning = 0;
     this._nextBolt = 4 + Math.random() * 8;
     this.group = new THREE.Group();

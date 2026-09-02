@@ -3,23 +3,27 @@ import * as THREE from 'three';
 export class SceneManager {
   constructor() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x141c32);
-    this.scene.fog = new THREE.FogExp2(0x151c30, 0.0028);
+    this.scene.background = new THREE.Color(0x87b7e8);
+    this.scene.fog = null;
     this.world = new THREE.Group();
     this.vehicles = new THREE.Group();
     this.fx = new THREE.Group();
     this.scene.add(this.world, this.vehicles, this.fx);
+    this._sky = null;
   }
 
   setEnv(envMap) {
     this.scene.environment = envMap;
-    if ('environmentIntensity' in this.scene) this.scene.environmentIntensity = 1.1;
+    if ('environmentIntensity' in this.scene) this.scene.environmentIntensity = 1.15;
   }
 
-  setFog(quality) {
-    this.scene.fog.density = quality.buildingDensity > 0.9 ? 0.0024 : 0.0032;
-    this.scene.fog.color.set(0x151c30);
-    this.scene.background.set(0x141c32);
+  setFog() {
+    this.scene.fog = null;
+  }
+
+  applyTod(tod) {
+    this.scene.fog = null;
+    this.scene.background.set(tod === 'night' ? 0x10182c : 0x87b7e8);
   }
 
   clearWorld() {

@@ -4,7 +4,9 @@ const DEFAULTS = {
   music: 0.6,
   sfx: 0.85,
   camera: 'chase',
-  rain: true
+  rain: false,
+  tod: 'day',
+  weather: 'clear'
 };
 
 export class SettingsManager {
@@ -16,6 +18,9 @@ export class SettingsManager {
     } catch {
       /* ignore */
     }
+    this.data.tod = this.data.tod || 'day';
+    this.data.weather = this.data.weather || 'clear';
+    this.data.rain = this.data.weather === 'rain';
     this._autoDetect();
   }
 

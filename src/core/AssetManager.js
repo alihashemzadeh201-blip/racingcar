@@ -179,7 +179,7 @@ export class AssetManager {
   }
 
   _sky() {
-    this.textures.sky = canvasTex(1024, 512, (g, w, h) => {
+    this.textures.skyNight = canvasTex(1024, 512, (g, w, h) => {
       const grd = g.createLinearGradient(0, 0, 0, h);
       grd.addColorStop(0, '#050614');
       grd.addColorStop(0.45, '#0c1028');
@@ -193,18 +193,31 @@ export class AssetManager {
         g.fillRect(Math.random() * w, Math.random() * h * 0.65, 1, 1);
       }
       g.globalAlpha = 1;
-      const glow = g.createRadialGradient(w * 0.72, h * 0.28, 4, w * 0.72, h * 0.28, 90);
-      glow.addColorStop(0, 'rgba(255,255,240,0.9)');
-      glow.addColorStop(0.2, 'rgba(180,200,255,0.25)');
-      glow.addColorStop(1, 'rgba(0,0,0,0)');
-      g.fillStyle = glow;
-      g.fillRect(0, 0, w, h);
-      const city = g.createLinearGradient(0, h * 0.72, 0, h);
-      city.addColorStop(0, 'rgba(255, 80, 140, 0.0)');
-      city.addColorStop(1, 'rgba(255, 40, 90, 0.25)');
-      g.fillStyle = city;
-      g.fillRect(0, h * 0.65, w, h * 0.35);
     });
+    this.textures.skyDay = canvasTex(1024, 512, (g, w, h) => {
+      const grd = g.createLinearGradient(0, 0, 0, h);
+      grd.addColorStop(0, '#5ba3e8');
+      grd.addColorStop(0.45, '#87c3f0');
+      grd.addColorStop(0.72, '#c8e4fa');
+      grd.addColorStop(1, '#eef6ff');
+      g.fillStyle = grd;
+      g.fillRect(0, 0, w, h);
+      const sun = g.createRadialGradient(w * 0.72, h * 0.28, 8, w * 0.72, h * 0.28, 120);
+      sun.addColorStop(0, 'rgba(255,250,220,1)');
+      sun.addColorStop(0.25, 'rgba(255,220,120,0.55)');
+      sun.addColorStop(1, 'rgba(255,220,120,0)');
+      g.fillStyle = sun;
+      g.fillRect(0, 0, w, h);
+      g.fillStyle = 'rgba(255,255,255,0.75)';
+      for (let i = 0; i < 8; i++) {
+        const cx = (i / 8) * w;
+        const cy = h * (0.28 + (i % 3) * 0.08);
+        g.beginPath();
+        g.ellipse(cx, cy, 80 + (i % 3) * 30, 22, 0, 0, Math.PI * 2);
+        g.fill();
+      }
+    });
+    this.textures.sky = this.textures.skyDay;
   }
 
   _particles() {
@@ -268,19 +281,29 @@ export class AssetManager {
     this.textures.skid.colorSpace = THREE.SRGBColorSpace;
   }
 
-  makeEnvScene() {
+  makeEnvScene(tod = 'day') {
     const scene = new THREE.Scene();
-    scene.add(new THREE.HemisphereLight(0x4466aa, 0x220011, 1.2));
-    const cols = [0xff2d6a, 0x3cf0ff, 0x7dffb3, 0xffc857, 0x7a5cff];
-    cols.forEach((c, i) => {
-      const l = new THREE.PointLight(c, 40, 80);
-      const a = (i / cols.length) * Math.PI * 2;
-      l.position.set(Math.cos(a) * 12, 4 + (i % 2) * 3, Math.sin(a) * 12);
-      scene.add(l);
-    });
+    if (tod === 'night') {
+      scene.add(new THREE.HemisphereLight(0x4466aa, 0x220011, 1.2));
+      const cols = [0xff2d6a, 0x3cf0ff, 0x7dffb3, 0xffc857, 0x7a5cff];
+      cols.forEach((c, i) => {
+        const l = new THREE.PointLight(c, 40, 80);
+        const a = (i / cols.length) * Math.PI * 2;
+        l.position.set(Math.cos(a) * 12, 4 + (i % 2) * 3, Math.sin(a) * 12);
+        scene.add(l);
+      });
+    } else {
+      scene.add(new THREE.HemisphereLight(0x9ec8ff, 0xc4a882, 2.2));
+      const sun = new THREE.DirectionalLight(0xfff4d6, 4);
+      sun.position.set(10, 18, 8);
+      scene.add(sun);
+    }
     const sky = new THREE.Mesh(
       new THREE.SphereGeometry(40, 16, 12),
-      new THREE.MeshBasicMaterial({ map: this.textures.sky, side: THREE.BackSide })
+      new THREE.MeshBasicMaterial({
+        map: tod === 'night' ? this.textures.skyNight : this.textures.skyDay,
+        side: THREE.BackSide
+      })
     );
     scene.add(sky);
     return scene;

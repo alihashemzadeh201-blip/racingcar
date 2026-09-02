@@ -26,7 +26,7 @@ export class CityGenerator {
   }
 
   _ground() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x161822, roughness: 0.9, metalness: 0.08 });
+    const mat = new THREE.MeshStandardMaterial({ color: 0x3d5a38, roughness: 0.92, metalness: 0.04 });
     const g = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), mat);
     g.rotation.x = -Math.PI / 2;
     g.position.y = -0.2;

@@ -8,7 +8,7 @@ export class Renderer {
       powerPreference: 'high-performance',
       alpha: false
     });
-    this.renderer.setClearColor(0x10182c, 1);
+    this.renderer.setClearColor(0x87b7e8, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.55;

@@ -70,8 +70,7 @@ export class Vehicle {
     const ud = this.mesh.userData;
     this._steerVis = damp(this._steerVis, p.steer * 0.55, 12, dt);
     ud.wheelMeshes.forEach((w, i) => {
-      const spinning = w.children[0];
-      if (spinning) spinning.rotation.x += p.speed * dt / 0.33;
+      if (w.userData.spinner) w.userData.spinner.rotation.x += p.speed * dt / 0.32;
       if (i < 2) w.rotation.y = this._steerVis;
       if (w.userData.disc) {
         w.userData.disc.material.emissiveIntensity = p.brake > 0.4 ? 0.8 : 0;

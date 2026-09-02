@@ -23,7 +23,7 @@ export class TrackManager {
     this._tmp2 = new THREE.Vector3();
   }
 
-  build({ reverse, assets, quality }) {
+  build({ reverse, assets, quality, rain = false }) {
     this.group.clear();
     this.reverse = reverse;
     this.curve = buildCurve(reverse);
@@ -35,43 +35,34 @@ export class TrackManager {
     this.segs = built.segs;
 
     const roadMat = new THREE.MeshStandardMaterial({
-      color: 0x4a4e58,
+      color: rain ? 0x3a3e48 : 0x5a5e68,
       map: assets.textures.asphalt,
       roughnessMap: assets.textures.asphaltRough,
-      roughness: 0.38,
-      metalness: 0.22,
-      envMapIntensity: 1.1
+      roughness: rain ? 0.28 : 0.62,
+      metalness: rain ? 0.28 : 0.08,
+      envMapIntensity: rain ? 1.2 : 0.55
     });
     const road = new THREE.Mesh(built.geo, roadMat);
     road.receiveShadow = true;
     this.group.add(road);
 
-    const puddleMat = new THREE.MeshPhysicalMaterial({
-      color: 0x1a2030,
-      metalness: 0.85,
-      roughness: 0.08,
-      transparent: true,
-      opacity: 0.35,
-      envMapIntensity: 2.2,
-      polygonOffset: true,
-      polygonOffsetFactor: -1
-    });
-    const puddles = new THREE.Mesh(built.geo.clone(), puddleMat);
-    puddles.position.y = 0.015;
-    this.group.add(puddles);
+    if (rain) {
+      const puddleMat = new THREE.MeshPhysicalMaterial({
+        color: 0x1a2030,
+        metalness: 0.85,
+        roughness: 0.08,
+        transparent: true,
+        opacity: 0.35,
+        envMapIntensity: 2.2,
+        polygonOffset: true,
+        polygonOffsetFactor: -1
+      });
+      const puddles = new THREE.Mesh(built.geo.clone(), puddleMat);
+      puddles.position.y = 0.015;
+      this.group.add(puddles);
+    }
 
     this.group.add(createLaneMarks(this.curve, this.width, 160));
-
-    const railMat = new THREE.MeshStandardMaterial({
-      color: 0x8a93a3,
-      metalness: 0.85,
-      roughness: 0.28,
-      emissive: 0x111820,
-      emissiveIntensity: 0.2
-    });
-    const lBarrier = new THREE.Mesh(createBarrierGeometry(this.left, 0.85), railMat);
-    const rBarrier = new THREE.Mesh(createBarrierGeometry(this.right, 0.85), railMat);
-    this.group.add(lBarrier, rBarrier);
 
     this._addStartFinish();
     this._addTunnel();

@@ -47,7 +47,7 @@ export class InputManager {
     if (this._padThrottle > 0.05) throttle = Math.max(throttle, this._padThrottle);
     if (this._padBrake > 0.05) brake = Math.max(brake, this._padBrake);
 
-    this.steer = steer;
+    this.steer = -steer;
     this.throttle = throttle;
     this.brake = brake;
     this.handbrake = handbrake || this._padHandbrake;

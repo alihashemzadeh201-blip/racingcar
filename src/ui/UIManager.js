@@ -66,11 +66,17 @@ export class UIManager {
       this._seg(e.currentTarget, b);
       this.game.setCameraMode(b.dataset.c);
     });
-    document.getElementById('rain-seg').addEventListener('click', (e) => {
+    document.getElementById('tod-seg').addEventListener('click', (e) => {
       const b = e.target.closest('button');
       if (!b) return;
       this._seg(e.currentTarget, b);
-      this.game.setRain(b.dataset.r === 'on');
+      this.game.setTod(b.dataset.tod);
+    });
+    document.getElementById('weather-seg').addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      this._seg(e.currentTarget, b);
+      this.game.setWeather(b.dataset.w);
     });
     ['vol-master', 'vol-music', 'vol-sfx'].forEach((id) => {
       document.getElementById(id).addEventListener('input', (e) => {
@@ -147,7 +153,7 @@ export class UIManager {
     TRACKS.forEach((t, i) => {
       const el = document.createElement('div');
       el.className = 'track-card' + (i === 0 ? ' on' : '');
-      el.innerHTML = `<h3>${t.name}</h3><p>${t.desc}</p><div class="track-meta">${t.lengthKm} KM · ${t.laps} LAPS · NIGHT</div>`;
+      el.innerHTML = `<h3>${t.name}</h3><p>${t.desc}</p><div class="track-meta">${t.lengthKm} KM · ${t.laps} LAPS</div>`;
       el.addEventListener('click', () => {
         grid.querySelectorAll('.track-card').forEach((n) => n.classList.remove('on'));
         el.classList.add('on');
@@ -164,7 +170,8 @@ export class UIManager {
     document.getElementById('vol-sfx').value = s.sfx * 100;
     document.querySelectorAll('#quality-seg button').forEach((b) => b.classList.toggle('on', b.dataset.q === s.quality));
     document.querySelectorAll('#cam-seg button').forEach((b) => b.classList.toggle('on', b.dataset.c === s.camera));
-    document.querySelectorAll('#rain-seg button').forEach((b) => b.classList.toggle('on', (b.dataset.r === 'on') === s.rain));
+    document.querySelectorAll('#tod-seg button').forEach((b) => b.classList.toggle('on', b.dataset.tod === (s.tod || 'day')));
+    document.querySelectorAll('#weather-seg button').forEach((b) => b.classList.toggle('on', b.dataset.w === (s.weather || 'clear')));
   }
 
   show(name) {

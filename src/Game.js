@@ -73,9 +73,12 @@ export class Game {
     this.ui.show('loading');
     try {
     await this.assets.loadAll((p, s) => this.ui.setLoading(p, s));
-    this.ui.setLoading(0.92, 'COMPOSITING NIGHT');
+    this.ui.setLoading(0.92, 'COMPOSITING WORLD');
     const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.envMap = pmrem.fromScene(this.assets.makeEnvScene(), 0.04).texture;
+    this._pmrem = pmrem;
+    this.envDay = pmrem.fromScene(this.assets.makeEnvScene('day'), 0.04).texture;
+    this.envNight = pmrem.fromScene(this.assets.makeEnvScene('night'), 0.04).texture;
+    this.envMap = this.settings.data.tod === 'night' ? this.envNight : this.envDay;
     this.scenes.setEnv(this.envMap);
     this.particles = new ParticleManager(this.scenes.fx, this.assets);
     this.applyQuality(this.settings.quality);
@@ -117,8 +120,31 @@ export class Game {
   }
 
   setRain(on) {
-    this.settings.set('rain', on);
-    this.weather.setEnabled(on);
+    this.setWeather(on ? 'rain' : 'clear');
+  }
+
+  setWeather(w) {
+    this.settings.set('weather', w);
+    this.settings.set('rain', w === 'rain');
+    this.weather.setEnabled(w === 'rain');
+    this._applyAtmosphere();
+  }
+
+  setTod(tod) {
+    this.settings.set('tod', tod);
+    this.envMap = tod === 'night' ? this.envNight : this.envDay;
+    this.scenes.setEnv(this.envMap);
+    this._applyAtmosphere();
+    if (this.state === 'menu' || this.state === 'garage') this._buildMenuWorld();
+  }
+
+  _applyAtmosphere() {
+    const tod = this.settings.data.tod || 'day';
+    const rain = this.settings.data.weather === 'rain';
+    this.scenes.applyTod(tod);
+    this.scenes.setFog();
+    this.weather.setEnabled(rain);
+    if (this.player) this.lights.build(this.city.lamps || [], this.settings.preset, tod, rain);
   }
 
   selectCar(id) {
@@ -193,7 +219,7 @@ export class Game {
     this.ui.resetCountdown();
     this.ui.setHudVisible(false);
     this.ui.show('loading');
-    this.ui.setLoading(0.12, 'BUILDING NIGHT CIRCUIT');
+    this.ui.setLoading(0.12, 'BUILDING CIRCUIT');
     this.state = 'loading';
     const run = () => {
       try {
@@ -203,7 +229,7 @@ export class Game {
         this.state = 'countdown';
         this.ui.show('none');
         this.ui.setHudVisible(true);
-        this.cam.playIntro();
+        this.cam.snap(this.player);
         this.playerCtrl.enabled = false;
         this.controllers.forEach((c) => (c.enabled = false));
       } catch (err) {
@@ -225,31 +251,36 @@ export class Game {
   }
 
   _buildMenuWorld() {
+    const tod = this.settings.data.tod || 'day';
+    const rain = this.settings.data.weather === 'rain';
     this.scenes.clearWorld();
+    this.scenes.applyTod(tod);
     this.weather.build(this.settings.preset);
-    this.weather.setEnabled(this.settings.data.rain);
+    this.weather.setEnabled(rain);
     const floor = new THREE.Mesh(
       new THREE.CircleGeometry(18, 48),
-      new THREE.MeshStandardMaterial({ color: 0x0a0c14, metalness: 0.7, roughness: 0.22, envMapIntensity: 1.6 })
+      new THREE.MeshStandardMaterial({
+        color: tod === 'night' ? 0x0a0c14 : 0xd8dde6,
+        metalness: 0.55,
+        roughness: 0.28,
+        envMapIntensity: 1.2
+      })
     );
     floor.rotation.x = -Math.PI / 2;
     this.scenes.world.add(floor);
     const ring = new THREE.Mesh(
       new THREE.TorusGeometry(7.2, 0.06, 8, 64),
-      new THREE.MeshStandardMaterial({ color: 0x3cf0ff, emissive: 0x3cf0ff, emissiveIntensity: 2 })
+      new THREE.MeshStandardMaterial({
+        color: tod === 'night' ? 0x3cf0ff : 0x1a6dff,
+        emissive: tod === 'night' ? 0x3cf0ff : 0x1a6dff,
+        emissiveIntensity: tod === 'night' ? 2 : 0.35
+      })
     );
     ring.rotation.x = Math.PI / 2;
     ring.position.y = 0.05;
     this.scenes.world.add(ring);
-    const p1 = new THREE.PointLight(0xff2d6a, 32, 40);
-    p1.position.set(-6, 4, 4);
-    const p2 = new THREE.PointLight(0x3cf0ff, 28, 40);
-    p2.position.set(6, 3, -4);
-    const p3 = new THREE.PointLight(0xffffff, 16, 24);
-    p3.position.set(0, 6, 2);
-    this.scenes.world.add(p1, p2);
     this._refreshMenuCar();
-    this.lights.build([], this.settings.preset);
+    this.lights.build([], this.settings.preset, tod, rain);
   }
 
   _refreshMenuCar() {
@@ -272,20 +303,24 @@ export class Game {
   _rebuildWorld(resetVehicles) {
     const preset = this.settings.preset;
     const tdef = this._trackDef();
+    const tod = this.settings.data.tod || 'day';
+    const rain = this.settings.data.weather === 'rain';
     this.scenes.clearWorld();
-    this.track.build({ reverse: tdef.reverse, assets: this.assets, quality: preset });
+    this.scenes.applyTod(tod);
+    this.track.build({ reverse: tdef.reverse, assets: this.assets, quality: preset, rain });
     this.scenes.world.add(this.track.group);
+    const skyMap = tod === 'night' ? this.assets.textures.skyNight : this.assets.textures.skyDay;
     const sky = new THREE.Mesh(
       new THREE.SphereGeometry(900, 24, 16),
-      new THREE.MeshBasicMaterial({ map: this.assets.textures.sky, side: THREE.BackSide, fog: false })
+      new THREE.MeshBasicMaterial({ map: skyMap, side: THREE.BackSide, fog: false })
     );
     this.scenes.world.add(sky);
     this.city.build(this.track, this.assets, preset);
     this.scenes.world.add(this.city.group);
     this.scenes.world.add(this.traffic.build(this.track, this.envMap, preset));
     this.weather.build(preset);
-    this.weather.setEnabled(this.settings.data.rain);
-    this.lights.build(this.city.lamps, preset);
+    this.weather.setEnabled(rain);
+    this.lights.build(this.city.lamps, preset, tod, rain);
 
     const field = [];
     this.player = new Vehicle({
@@ -326,7 +361,7 @@ export class Game {
     }
     this.race.setup(this.player, field, tdef.laps);
     this.cam.setMode(this.settings.data.camera);
-    this._camReady = false;
+    this.cam.snap(this.player);
   }
 
   _frame() {
@@ -468,17 +503,34 @@ export class Game {
     const info = this.track.closest(v.physics.position, v.raceT);
     const p = v.physics;
     const roadY = info.point.y;
-    const limit = this.track.width / 2 - 0.2;
-    if (Math.abs(info.lateral) > limit) {
-      const push = (Math.abs(info.lateral) - limit);
-      const dir = info.binormal.clone().multiplyScalar(-Math.sign(info.lateral));
-      p.position.addScaledVector(dir, push);
-      const into = p.velocity.dot(info.binormal) * Math.sign(info.lateral);
-      if (into > 0) {
-        p.applyHit(Math.min(12, into * 0.4), dir);
-        p.speed *= 0.72;
-        if (v.isPlayer) this.audio.impact();
+    const half = this.track.width / 2;
+    const off = Math.abs(info.lateral) - half;
+    p._offT = p._offT || 0;
+    if (off > 0.4) {
+      p.surfaceGrip = this.settings.data.rain ? 0.38 : 0.5;
+      const dir = info.binormal.clone().multiplyScalar(-Math.sign(info.lateral || 1));
+      if (off > 10) {
+        p.position.addScaledVector(dir, (off - 10) * 0.35);
+        const into = p.velocity.dot(info.binormal) * Math.sign(info.lateral || 1);
+        if (into > 0) {
+          p.velocity.addScaledVector(dir, into);
+          p.speed *= 0.92;
+        }
       }
+      if (Math.abs(p.speed) < 2.5) p._offT += dt;
+      else p._offT = 0;
+      if (p._offT > 0.9) {
+        const s = this.track.sampleT(v.raceT || info.t);
+        p.position.copy(s.point);
+        p.position.y = s.point.y;
+        p.yaw = Math.atan2(s.tangent.x, s.tangent.z);
+        p.speed = 8;
+        p.velocity.set(Math.sin(p.yaw) * 8, 0, Math.cos(p.yaw) * 8);
+        p._offT = 0;
+      }
+    } else {
+      p._offT = 0;
+      p.surfaceGrip = this.settings.data.rain ? 0.86 : 1;
     }
     if (p.grounded) {
       if (p.position.y > roadY + 0.85 && Math.abs(p.speed) > 16) {
@@ -491,10 +543,6 @@ export class Game {
       p.grounded = true;
       if (p.airTime > 0.35) p.camShake = Math.min(1, p.camShake + 0.4);
     }
-    p.surfaceGrip = this.settings.data.rain ? 0.86 : 1;
-    const sec = info.section;
-    if (sec === 'wet') p.surfaceGrip *= 0.9;
-    if (sec === 'tunnel') p.surfaceGrip *= 1.02;
   }
 
   _carCollisions(field) {
