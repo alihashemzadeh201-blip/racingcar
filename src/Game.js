@@ -191,13 +191,29 @@ export class Game {
 
   startRace() {
     this.ui.resetCountdown();
-    this._rebuildWorld(true);
-    this.state = 'countdown';
-    this.ui.show('none');
-    this.ui.setHudVisible(true);
-    this.cam.playIntro();
-    this.playerCtrl.enabled = false;
-    this.controllers.forEach((c) => (c.enabled = false));
+    this.ui.setHudVisible(false);
+    this.ui.show('loading');
+    this.ui.setLoading(0.12, 'BUILDING NIGHT CIRCUIT');
+    this.state = 'loading';
+    const run = () => {
+      try {
+        this.ui.setLoading(0.45, 'LAYING ASPHALT');
+        this._rebuildWorld(true);
+        this.ui.setLoading(1, 'GRID READY');
+        this.state = 'countdown';
+        this.ui.show('none');
+        this.ui.setHudVisible(true);
+        this.cam.playIntro();
+        this.playerCtrl.enabled = false;
+        this.controllers.forEach((c) => (c.enabled = false));
+      } catch (err) {
+        console.error('startRace failed', err);
+        this.ui.setLoading(1, `ERROR  ${err.message || err}`);
+        this.state = 'track';
+        setTimeout(() => this.show('track'), 1600);
+      }
+    };
+    requestAnimationFrame(() => requestAnimationFrame(run));
   }
 
   _def() {
@@ -316,6 +332,10 @@ export class Game {
     this.input.update();
     this._handleGlobalInput();
 
+    if (this.state === 'loading') {
+      this.post.render(dt, 0, false, false);
+      return;
+    }
     if (this.state === 'menu' || this.state === 'garage' || this.state === 'track' || this.state === 'settings' || this.state === 'controls') {
       this._updateMenu(dt);
     } else if (this.state === 'countdown' || this.state === 'racing') {

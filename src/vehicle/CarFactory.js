@@ -68,6 +68,36 @@ function mat(params) {
   return new THREE.MeshPhysicalMaterial(params);
 }
 
+let SHARED_BODY_GEO = null;
+function getBodyGeometry() {
+  if (SHARED_BODY_GEO) return SHARED_BODY_GEO;
+  const profile = new THREE.Shape();
+  profile.moveTo(-2.22, 0.16);
+  profile.bezierCurveTo(-2.28, 0.16, -2.32, 0.28, -2.26, 0.48);
+  profile.lineTo(-2.12, 0.62);
+  profile.lineTo(-1.55, 0.7);
+  profile.lineTo(-1.05, 1.08);
+  profile.bezierCurveTo(-0.7, 1.2, 0.05, 1.22, 0.45, 1.12);
+  profile.lineTo(1.12, 0.74);
+  profile.lineTo(1.85, 0.58);
+  profile.bezierCurveTo(2.15, 0.52, 2.32, 0.42, 2.3, 0.28);
+  profile.lineTo(2.22, 0.16);
+  profile.closePath();
+  const bodyGeo = new THREE.ExtrudeGeometry(profile, {
+    depth: 1.72,
+    bevelEnabled: true,
+    bevelThickness: 0.1,
+    bevelSize: 0.08,
+    bevelSegments: 2,
+    steps: 1
+  });
+  bodyGeo.rotateY(-Math.PI / 2);
+  bodyGeo.translate(0.86, 0, 0);
+  bodyGeo.computeVertexNormals();
+  SHARED_BODY_GEO = bodyGeo;
+  return bodyGeo;
+}
+
 export function createCarMesh(def, paint, wheelStyle, envMap) {
   const group = new THREE.Group();
   group.name = def.id;
@@ -119,30 +149,7 @@ export function createCarMesh(def, paint, wheelStyle, envMap) {
   const body = new THREE.Group();
   body.name = 'body';
 
-  const profile = new THREE.Shape();
-  profile.moveTo(-2.22, 0.16);
-  profile.bezierCurveTo(-2.28, 0.16, -2.32, 0.28, -2.26, 0.48);
-  profile.lineTo(-2.12, 0.62);
-  profile.lineTo(-1.55, 0.7);
-  profile.lineTo(-1.05, 1.08);
-  profile.bezierCurveTo(-0.7, 1.2, 0.05, 1.22, 0.45, 1.12);
-  profile.lineTo(1.12, 0.74);
-  profile.lineTo(1.85, 0.58);
-  profile.bezierCurveTo(2.15, 0.52, 2.32, 0.42, 2.3, 0.28);
-  profile.lineTo(2.22, 0.16);
-  profile.closePath();
-  const bodyGeo = new THREE.ExtrudeGeometry(profile, {
-    depth: 1.72,
-    bevelEnabled: true,
-    bevelThickness: 0.1,
-    bevelSize: 0.08,
-    bevelSegments: 2,
-    steps: 1
-  });
-  bodyGeo.rotateY(-Math.PI / 2);
-  bodyGeo.translate(0.86, 0, 0);
-  bodyGeo.computeVertexNormals();
-  const shell = new THREE.Mesh(bodyGeo, bodyMat);
+  const shell = new THREE.Mesh(getBodyGeometry(), bodyMat);
   shell.castShadow = true;
   body.add(shell);
 

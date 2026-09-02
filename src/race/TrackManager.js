@@ -4,7 +4,8 @@ import {
   createRoadGeometry,
   createBarrierGeometry,
   createLaneMarks,
-  sectionAt
+  sectionAt,
+  roadFrame
 } from './TrackGenerator.js';
 
 export class TrackManager {
@@ -59,7 +60,7 @@ export class TrackManager {
     puddles.position.y = 0.015;
     this.group.add(puddles);
 
-    this.group.add(createLaneMarks(this.curve, this.width, 300));
+    this.group.add(createLaneMarks(this.curve, this.width, 160));
 
     const railMat = new THREE.MeshStandardMaterial({
       color: 0x8a93a3,

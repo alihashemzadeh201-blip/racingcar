@@ -14,6 +14,7 @@ export class CityGenerator {
     this.lamps = [];
     this.neons = [];
     this.flicker = [];
+    this._occ = null;
 
     this._ground();
     this._buildings(track, assets, quality);
