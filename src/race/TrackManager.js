@@ -219,10 +219,10 @@ export class TrackManager {
   spawnPose(index, total) {
     const row = Math.floor(index / 2);
     const side = index % 2 === 0 ? -1 : 1;
-    const t = (1 - row * 0.012) % 1;
+    const t = ((1 - (row + 1) * 0.018) % 1 + 1) % 1;
     const s = this.sampleT(t);
-    const pos = s.point.clone().addScaledVector(s.binormal, side * 3.2);
-    pos.y += 0.2;
+    const pos = s.point.clone().addScaledVector(s.binormal, side * 2.4);
+    pos.y += 0.05;
     const yaw = Math.atan2(s.tangent.x, s.tangent.z);
     return { pos, yaw, t };
   }

@@ -26,14 +26,14 @@ export class Vehicle {
   }
 
   _addHeadlights() {
-    const spotL = new THREE.SpotLight(0xe8f4ff, 22, 56, Math.PI / 6, 0.4, 1.0);
-    const spotR = new THREE.SpotLight(0xe8f4ff, 22, 56, Math.PI / 6, 0.4, 1.0);
-    spotL.position.set(0.55, 0.55, 2.3);
-    spotR.position.set(-0.55, 0.55, 2.3);
+    const spotL = new THREE.SpotLight(0xe8f4ff, 8, 48, Math.PI / 6, 0.45, 1.1);
+    const spotR = new THREE.SpotLight(0xe8f4ff, 8, 48, Math.PI / 6, 0.45, 1.1);
+    spotL.position.set(0.45, 0.55, 2.2);
+    spotR.position.set(-0.45, 0.55, 2.2);
     const tL = new THREE.Object3D();
     const tR = new THREE.Object3D();
-    tL.position.set(0.55, 0.2, 18);
-    tR.position.set(-0.55, 0.2, 18);
+    tL.position.set(0.45, 0.2, 16);
+    tR.position.set(-0.45, 0.2, 16);
     this.mesh.add(tL, tR, spotL, spotR);
     spotL.target = tL;
     spotR.target = tR;
@@ -42,7 +42,7 @@ export class Vehicle {
 
   setQuality(preset) {
     this.headlights.forEach((l) => {
-      l.intensity = 22;
+      l.intensity = 8;
       l.castShadow = false;
     });
   }
@@ -62,26 +62,27 @@ export class Vehicle {
   syncTransform() {
     const p = this.physics;
     this.mesh.position.copy(p.position);
-    this.mesh.rotation.set(p.pitch, p.yaw, p.roll, 'YXZ');
+    this.mesh.rotation.set(0, p.yaw, 0);
+    const ud = this.mesh.userData;
+    if (ud.body) {
+      ud.body.rotation.x = p.pitch;
+      ud.body.rotation.z = p.roll;
+    }
   }
 
   updateVisuals(dt) {
     const p = this.physics;
     const ud = this.mesh.userData;
-    this._steerVis = damp(this._steerVis, p.steer * 0.55, 12, dt);
+    this._steerVis = damp(this._steerVis, p.steer * 0.45, 12, dt);
     ud.wheelMeshes.forEach((w, i) => {
-      if (w.userData.spinner) w.userData.spinner.rotation.x += p.speed * dt / 0.32;
+      if (w.userData.spinner) w.userData.spinner.rotation.x += p.speed * dt / 0.34;
       if (i < 2) w.rotation.y = this._steerVis;
-      if (w.userData.disc) {
-        w.userData.disc.material.emissiveIntensity = p.brake > 0.4 ? 0.8 : 0;
-      }
     });
-    ud.lightRear.emissiveIntensity = p.brake > 0.15 ? 5.5 : p.speed < -1 ? 2 : 1.1;
+    ud.lightRear.emissiveIntensity = p.brake > 0.15 ? 4.5 : 1.2;
     const nos = p.nitro && p.nitroAmount > 0.02 && p.throttle > 0.1;
     ud.flameMat.opacity = nos ? 0.85 : 0;
-    ud.flameL.scale.z = nos ? 1 + Math.random() * 1.4 : 0.01;
-    ud.flameR.scale.z = nos ? 1 + Math.random() * 1.4 : 0.01;
-    ud.body.position.y = Math.sin(performance.now() * 0.02) * Math.min(0.02, Math.abs(p.speed) * 0.0004);
+    ud.flameL.scale.z = nos ? 1 + Math.random() * 1.2 : 0.01;
+    ud.flameR.scale.z = nos ? 1 + Math.random() * 1.2 : 0.01;
     this.syncTransform();
   }
 

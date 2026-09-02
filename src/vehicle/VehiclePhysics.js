@@ -149,8 +149,8 @@ export class VehiclePhysics {
     this.velocity.set(forward.x * vF + right.x * vR, this.velocity.y, forward.z * vF + right.z * vR);
     this.position.addScaledVector(this.velocity, dt);
 
-    const pitchTarget = -accel * 0.012 - (this.grounded ? 0 : 0.12);
-    const rollTarget = -this.steer * 0.32 - vR * 0.015;
+    const pitchTarget = THREE.MathUtils.clamp(-accel * 0.0035, -0.06, 0.05);
+    const rollTarget = THREE.MathUtils.clamp(-this.steer * 0.12 - vR * 0.008, -0.18, 0.18);
     this.pitch = damp(this.pitch, pitchTarget, 8, dt);
     this.roll = damp(this.roll, rollTarget, 8, dt);
 

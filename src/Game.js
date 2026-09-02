@@ -341,11 +341,11 @@ export class Game {
     this.controllers = [];
     const aiDefs = CAR_CATALOG.filter((c) => c.id !== this.selectedCarId);
     const styles = [
-      { skill: 0.82, aggressiveness: 0.7, lineOffset: -1.4, look: 0.07, nitroChance: 0.5, name: 'KIRA' },
-      { skill: 0.7, aggressiveness: 0.4, lineOffset: 1.8, look: 0.08, nitroChance: 0.3, name: 'NOVA' },
-      { skill: 0.88, aggressiveness: 0.85, lineOffset: 0.4, look: 0.055, nitroChance: 0.6, name: 'REX' },
-      { skill: 0.64, aggressiveness: 0.55, lineOffset: -2.2, look: 0.09, nitroChance: 0.25, name: 'MIRA' },
-      { skill: 0.76, aggressiveness: 0.5, lineOffset: 2.4, look: 0.065, nitroChance: 0.4, name: 'JAX' }
+      { skill: 0.8, aggressiveness: 0.45, lineOffset: -1.6, look: 0.05, nitroChance: 0.3, name: 'KIRA' },
+      { skill: 0.7, aggressiveness: 0.35, lineOffset: 1.6, look: 0.055, nitroChance: 0.25, name: 'NOVA' },
+      { skill: 0.84, aggressiveness: 0.5, lineOffset: 0.2, look: 0.048, nitroChance: 0.35, name: 'REX' },
+      { skill: 0.66, aggressiveness: 0.3, lineOffset: -2.0, look: 0.06, nitroChance: 0.2, name: 'MIRA' },
+      { skill: 0.74, aggressiveness: 0.4, lineOffset: 2.0, look: 0.052, nitroChance: 0.28, name: 'JAX' }
     ];
     for (let i = 0; i < 5; i++) {
       const def = aiDefs[i % aiDefs.length];
@@ -567,8 +567,8 @@ export class Game {
           db.z -= nz * pen * 0.5;
           const dir = new THREE.Vector3(nx, 0, nz);
           const rel = Math.abs(a.physics.speed - b.physics.speed);
-          a.physics.applyHit(2 + rel * 0.15, dir);
-          b.physics.applyHit(2 + rel * 0.15, dir.clone().negate());
+          a.physics.applyHit(1.1 + rel * 0.06, dir);
+          b.physics.applyHit(1.1 + rel * 0.06, dir.clone().negate());
           if (a.isPlayer || b.isPlayer) this.audio.impact();
         }
       }
